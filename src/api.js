@@ -1,5 +1,5 @@
-const apiKey = process.env.REACT_APP_MOVIEDB_API_KEY;
-const url = process.env.REACT_APP_MOVIEDB_URL;
+const apiKey = import.meta.env.VITE_MOVIEDB_API_KEY;
+const url = import.meta.env.VITE_MOVIEDB_URL;
 
 export const getPopular = async () => {
     try {
