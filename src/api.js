@@ -1,9 +1,9 @@
-const apikey = "46dcfd253acf9ca38369193ccb07c77a";
-const url = "https://api.themoviedb.org/3"; 
+const apiKey = process.env.REACT_APP_MOVIEDB_API_KEY;
+const url = process.env.REACT_APP_MOVIEDB_URL;
 
 export const getPopular = async () => {
     try {
-        const response = await fetch(`${url}/movie/popular?api_key=${apikey}`);
+        const response = await fetch(`${url}/movie/popular?api_key=${apiKey}`);
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -17,7 +17,7 @@ export const getPopular = async () => {
 
 export const searchMovies = async (query) => {
     try {
-        const response = await fetch(`${url}/search/movie?api_key=${apikey}&query=${encodeURIComponent(query)}`);
+        const response = await fetch(`${url}/search/movie?api_key=${apiKey}&query=${encodeURIComponent(query)}`);
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -28,4 +28,3 @@ export const searchMovies = async (query) => {
         return [];
     }
 };
-
