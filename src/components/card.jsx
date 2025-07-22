@@ -69,8 +69,12 @@ function Card({ movie, theme }) {
       </div>
 
       <div className="absolute inset-0 flex flex-col justify-end p-4 text-center z-20">
-        <h3 className={`text-lg font-bold ${textColor}`}>{movie?.Title}</h3>
-        <p className={yearColor}>{movie?.Year}</p>
+        <h3 className="text-lg font-bold text-white [text-shadow:_1px_1px_3px_rgb(0_0_0_/_90%)]">
+          {movie?.Title}
+        </h3>
+        <p className="text-yellow-300 [text-shadow:_1px_1px_2px_rgb(0_0_0_/_80%)]">
+          {movie?.Year}
+        </p>
       </div>
 
       <div className={`absolute inset-0 ${overlayBg} bg-opacity-90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5 z-30`}>

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect } from 'react';
 import Card from '../components/card';
-import { searchMovies} from '../services/api'; 
+import { searchMovies } from '../services/api';
 import { useTheme } from '../contexts/toggle';
 
 function Home() {
@@ -9,45 +9,9 @@ function Home() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isTyping, setIsTyping] = useState(false);
 
-   useEffect(() => {
-    const fetchMovies = async () => {
-
-      if (!searchQuery.trim()) {
-        setMovies([]);
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-
-      try {
-        const data = await searchMovies(searchQuery);
-        console.log("Fetched movies:", data);
-
-        if (data && data.Search) {
-          setMovies(data.Search);
-        } 
-        
-        else {
-          setMovies([]);
-          if (data?.Error) setError(data.Error);
-        }
-      } 
-      
-      catch (err) {
-        setError('Failed to fetch movies');
-      } 
-      
-      finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMovies();
-  }, [searchQuery]);
-
-    const movieCollection = [
+   const movieCollection = [
   {
     Title: "The Shawshank Redemption",
     Year: "1994",
@@ -184,50 +148,147 @@ function Home() {
     Genre: "Crime, Drama, Thriller"
   }
 ];
- 
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const fetchMovies = async () => {
+        if (!searchQuery.trim()) {
+          setMovies(movieCollection);
+          setIsTyping(false);
+          return;
+        }
+
+        setLoading(true);
+        setError(null);
+        setIsTyping(false);
+
+        try {
+          const data = await searchMovies(searchQuery);
+          if (data?.Search) {
+            setMovies(data.Search);
+          } else {
+            setMovies([]);
+            if (data?.Error) setError(data.Error);
+          }
+        } catch (err) {
+          setError('Failed to fetch movies');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchMovies();
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   useEffect(() => {
     setMovies(movieCollection);
   }, []);
-  
-  const bgColor = theme === 'dark' ? 'bg-gray-900' : 'bg-white';
+
+  const handleInputChange = (e) => {
+    setSearchQuery(e.target.value);
+    setIsTyping(true);
+  };
+
+  const bgColor = theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50';
   const textColor = theme === 'dark' ? 'text-gray-100' : 'text-gray-800';
-  const borderColor = theme === 'dark' ? 'border-gray-700' : 'border-gray-300';
+  const inputBgColor = theme === 'dark' ? 'bg-gray-800' : 'bg-white';
+  const inputBorderColor = theme === 'dark' ? 'border-gray-700' : 'border-gray-300';
+  const inputFocusColor = theme === 'dark' ? 'focus:border-blue-500' : 'focus:border-blue-400';
   const placeholderColor = theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-500';
-  const errorColor = theme === 'dark' ? 'text-red-400' : 'text-red-500';
+  const errorColor = theme === 'dark' ? 'text-red-400' : 'text-red-600';
   const emptyStateColor = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
 
   return (
-    <div className={`${bgColor} min-h-screen`}>
-      <div className={`max-w-4xl mx-auto p-4 ${textColor}`}>
-        <div className="relative flex items-center mb-8">
-          <input
-            type="text"
-            placeholder="Search movies..."
-            className={`w-full px-4 py-2 border rounded shadow-sm ${borderColor} ${placeholderColor} ${bgColor} ${textColor}`}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+    <div className={`${bgColor} min-h-screen transition-colors duration-300`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Hero Section */}
+        <div className="text-center mb-12">
+          <h1 className={`text-4xl md:text-5xl font-bold mb-4 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
+            Discover Amazing Movies
+          </h1>
+          <p className={`text-lg max-w-2xl mx-auto ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+            Search for your favorite movies, explore details, and save them to your favorites
+          </p>
         </div>
 
-        {loading ? (
-          <div className="text-center py-12">
-            <p className={emptyStateColor}>Loading...</p>
+        {/* Search Section */}
+        <div className="relative mb-12 max-w-2xl mx-auto">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search for movies..."
+              className={`w-full px-6 py-4 rounded-xl shadow-lg text-lg ${inputBgColor} ${inputBorderColor} ${inputFocusColor} ${placeholderColor} ${textColor} transition-all duration-300 focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-500' : 'focus:ring-blue-400'} focus:outline-none`}
+              value={searchQuery}
+              onChange={handleInputChange}
+            />
+            <svg
+              className={`absolute right-4 top-1/2 transform -translate-y-1/2 h-6 w-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </div>
-        ) : error ? (
-          <div className="text-center py-12">
-            <p className={errorColor}>{error}</p>
-          </div>
-        ) : movies.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {movies.map((movie, index) => (
-              <Card key={index} movie={movie} theme={theme} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className={emptyStateColor}>No movies found</p>
-          </div>
-        )}
+          {isTyping && (
+            <p className={`mt-2 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} transition-opacity duration-200`}>
+              Start typing to search movies...
+            </p>
+          )}
+        </div>
+
+        {/* Content Section */}
+        <div className="transition-all duration-300">
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className={`animate-spin rounded-full h-12 w-12 border-t-2 ${theme === 'dark' ? 'border-blue-500' : 'border-blue-400'}`}></div>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <div className="inline-block p-4 rounded-lg bg-opacity-20 bg-red-500">
+                <svg
+                  className="w-12 h-12 mx-auto mb-4 text-red-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className={`text-xl font-medium ${errorColor}`}>Oops! Something went wrong</p>
+                <p className={`mt-2 ${emptyStateColor}`}>{error}</p>
+              </div>
+            </div>
+          ) : movies.length > 0 ? (
+            <>
+              <h2 className={`text-2xl font-bold mb-6 ${textColor}`}>
+                {searchQuery ? 'Search Results' : 'Popular Movies'}
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+                {movies.map((movie, index) => (
+                  <Card key={index} movie={movie} theme={theme} />
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <div className="inline-block p-4 rounded-lg bg-opacity-20 bg-blue-500">
+                <svg
+                  className="w-12 h-12 mx-auto mb-4 text-blue-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className={`text-xl font-medium ${emptyStateColor}`}>No movies found</p>
+                <p className={`mt-2 ${emptyStateColor}`}>Try a different search term</p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
