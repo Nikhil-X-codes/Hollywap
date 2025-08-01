@@ -149,11 +149,11 @@ function Home() {
   }
 ];
 
-  useEffect(() => {
+   useEffect(() => {
     const timer = setTimeout(() => {
       const fetchMovies = async () => {
         if (!searchQuery.trim()) {
-          setMovies(movieCollection);
+          setMovies([]); // Or set to your default movie collection if needed
           setIsTyping(false);
           return;
         }
@@ -168,10 +168,11 @@ function Home() {
             setMovies(data.Search);
           } else {
             setMovies([]);
-            if (data?.Error) setError(data.Error);
+            setError(data?.Error || 'No movies found');
           }
         } catch (err) {
           setError('Failed to fetch movies');
+          console.error(err);
         } finally {
           setLoading(false);
         }
